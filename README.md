@@ -200,3 +200,63 @@ Now, let’s create a pod with the “app” label and observe the behavoiur:
     # Create a pod with label
     >> kubectl run nginx --image=nginx --labels=app=test
     pod/nginx created
+
+In the above demonstration, we can see that pod is deployed without any issues because we specified the required label while creating the pod.
+
+**Constraint: namespace label**
+
+A ConstraintTemplate can be used by several Constraint. 
+In the previous phase, we specified a Constraint so that a pod must have a particular label. 
+If required we can create another Constraint using the same ConstraintTemplate but this time it will be for a namespace.
+We can write a Constraint so that a namespace must have a particular label.
+
+Following is the Constraint file named “ns-must-label-state.yaml” for enforcing the namespaces to have a particular label called “state”:
+
+    # ns-must-label-state.yaml
+    
+    apiVersion: constraints.gatekeeper.sh/v1beta1
+    kind: K8sRequiredLabels
+    metadata:
+      name: ns-must-label-state
+    spec:
+      match:
+        kinds:
+          - apiGroups: [""]
+            kinds: ["Namespace"]
+      parameters:
+        labels: ["state"]
+
+Let’s create Constraint using the above-defined “ns-must-label-state.yaml” :
+
+        >> kubectl create -f ns-must-label-state.yaml
+        
+        # List the available Constraint's
+        >> kubectl get constraints
+        
+        NAME                      ENFORCEMENT-ACTION   TOTAL-VIOLATIONS
+        ns-must-label-state                            6
+        pod-must-have-app-level                        10
+
+And then create a namespace without defining the required label which is “state” in the current case:
+
+     kubectl create ns test
+    
+    Error from server (Forbidden): admission webhook "validation.gatekeeper.sh" denied the request: [ns-must-label-state] you must provide labels: {"state"}
+
+Now, create a namespace using the required label and see what happens:
+
+        # test-ns.yaml
+        
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: test
+          labels:
+            state: dev   #<---
+        
+        ---
+        
+        >> kubectl create -f test-ns.yaml
+        namespace/test created
+
+References: https://github.com/open-policy-agent/gatekeeper
