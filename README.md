@@ -80,5 +80,13 @@ Gatekeeper creates several CRDs during the installation process :
     providers.externaldata.gatekeeper.sh                                2023-10-02T06:15:38Z
 
 
-One of them is “constrainttemplates.templates.gatekeeper.sh” using that we can create Constraints and Constraint Templates to work with gatekeeper:
+One of them is “constrainttemplates.templates.gatekeeper.sh” using that 
+we can create Constraints and Constraint Templates to work with gatekeeper:
 
+![image](https://github.com/tushardashpute/opa_gatekeeper/assets/74225291/47613d3e-e554-4b83-9fa9-6c4129570b2b)
+
+● [ConstraintTemplates](https://open-policy-agent.github.io/gatekeeper/website/docs/howto/#constraint-templates) define a way to validate some set of Kubernetes objects in Gatekeeper’s Kubernetes admission controller. 
+They are made of two main elements:
+
+ 1. Rego code that defines a policy violation
+ 2. The schema of the accompanying Constraint object, which represents an instantiation of a ConstraintTemplate
