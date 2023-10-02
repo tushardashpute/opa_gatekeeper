@@ -102,5 +102,101 @@ Following is an illustration of how CRD, Contraint Template, and Constraint conn
 ![image](https://github.com/tushardashpute/opa_gatekeeper/assets/74225291/5c57fc23-3be5-43a0-9330-964145b7c5f6)
 
 **Walkthrough**
+
 Now let’s say we want to enforce a policy so that a kubernetes resource (such as a pod, namespace, etc) must have a particular label defined. 
 To achieve that let’s create a ConstraintTemplate first and then create a Constraint :
+
+**ConstraintTemplate:**
+
+Following is the ConstraintTemplate.yaml file, we will use this file to create an ConstraintTemplate on our k8s cluster:
+
+
+    # ConstraintTemplate.yaml
+    # ---------------------------------------------------------------
+    apiVersion: templates.gatekeeper.sh/v1
+    kind: ConstraintTemplate                    # Template Identifying Info
+    metadata:
+      name: k8srequiredlabels
+    # ----------------------------------------------------------------
+    spec:
+      crd:
+        spec:
+          names:
+            kind: K8sRequiredLabels        # Template values for constraint crd's 
+          validation:
+            # Schema for the `parameters` field
+            openAPIV3Schema:
+              type: object
+              properties:
+                labels:
+                  type: array
+                  items:
+                    type: string
+    # ----------------------------------------------------------------
+      targets:
+        - target: admission.k8s.gatekeeper.sh
+          rego: |                                     # Rego
+            package k8srequiredlabels
+    
+            violation[{"msg": msg, "details": {"missing_labels": missing}}] {
+              provided := {label | input.review.object.metadata.labels[label]}
+              required := {label | label := input.parameters.labels[_]}
+              missing := required - provided
+              count(missing) > 0
+              msg := sprintf("you must provide labels: %v", [missing])
+            }
+    # ----------------------------------------------------------------
+
+
+Create the ConstraintTemplate using the above-defined manifests :
+
+    >> kubectl create -f ConstraintTemplate.yaml
+    
+    #　List the available ConstraintTemplate's 
+    >> kubectl get ConstraintTemplate
+    NAME                AGE
+    k8srequiredlabels   29s
+
+**Constraint: pod label**
+
+Now, let's create a Constraintthat will enforce that a pod must have a policy named “app” every time a pod is created. 
+Following is the Constraint file named “pod-must-have-app-level.yaml”
+
+    # pod-must-have-app-level.yaml
+    
+    apiVersion: constraints.gatekeeper.sh/v1beta1
+    kind: K8sRequiredLabels
+    metadata:
+      name: pod-must-have-app-level
+    spec:
+      match:
+        kinds:
+          - apiGroups: [""]
+            kinds: ["Pod"]   
+      parameters:
+        labels: ["app"] 
+
+Create the Constraint on our kubernetes cluster and list the available constraints:
+
+        >> kubectl create -f pod-must-have-app-level.yaml
+        
+        # List the available Constraint's
+        >> kubectl get constraints
+        
+        NAME                      ENFORCEMENT-ACTION   TOTAL-VIOLATIONS
+        pod-must-have-app-level                        10
+
+Now, let's create a pod without defining the label and observe what happens:
+    
+    # Create a pod without labels
+    >> kubectl run nginx --image=nginx 
+    Error from server (Forbidden): admission webhook "validation.gatekeeper.sh" denied the request: [pod-must-have-app-level] you must provide labels: {"app"}
+
+
+As we can see in the above demonstration, a pod creation request is being denied because the required “label” is not provided while creating the pod.
+
+Now, let’s create a pod with the “app” label and observe the behavoiur:
+
+    # Create a pod with label
+    >> kubectl run nginx --image=nginx --labels=app=test
+    pod/nginx created
