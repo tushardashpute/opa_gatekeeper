@@ -85,8 +85,22 @@ we can create Constraints and Constraint Templates to work with gatekeeper:
 
 ![image](https://github.com/tushardashpute/opa_gatekeeper/assets/74225291/47613d3e-e554-4b83-9fa9-6c4129570b2b)
 
-● [ConstraintTemplates](https://open-policy-agent.github.io/gatekeeper/website/docs/howto/#constraint-templates) define a way to validate some set of Kubernetes objects in Gatekeeper’s Kubernetes admission controller. 
+● [**ConstraintTemplates**](https://open-policy-agent.github.io/gatekeeper/website/docs/howto/#constraint-templates) define a way to validate some set of Kubernetes objects in Gatekeeper’s Kubernetes admission controller. 
 They are made of two main elements:
 
- 1. Rego code that defines a policy violation
+ 1. [**Rego**](https://www.openpolicyagent.org/docs/latest/#rego) code that defines a policy violation
  2. The schema of the accompanying Constraint object, which represents an instantiation of a ConstraintTemplate
+
+    ● A Constraint is a declaration of requirements that a system needs to meet. 
+    In another word, Constraints are used to inform Gatekeeper that the admin wants a
+    ConstraintTemplate to be enforced, and how.
+
+![image](https://github.com/tushardashpute/opa_gatekeeper/assets/74225291/1b9ad277-9530-4adc-adc6-bd7c5a95d626)
+
+Following is an illustration of how CRD, Contraint Template, and Constraint connect with each other:
+
+![image](https://github.com/tushardashpute/opa_gatekeeper/assets/74225291/5c57fc23-3be5-43a0-9330-964145b7c5f6)
+
+**Walkthrough**
+Now let’s say we want to enforce a policy so that a kubernetes resource (such as a pod, namespace, etc) must have a particular label defined. 
+To achieve that let’s create a ConstraintTemplate first and then create a Constraint :
