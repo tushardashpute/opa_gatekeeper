@@ -14,8 +14,11 @@ OPA Gatekeeper is a specialized project providing first-class integration betwee
 OPA Gatekeeper adds the following on top of plain OPA:
 
 ● An extensible, parameterized policy library.
+
 ● Native Kubernetes CRDs for instantiating the policy library (aka “constraints”).
+
 ● Native Kubernetes CRDs for extending the policy library (aka “constraint templates”).
+
 ● Audit functionality.
 
 ![image](https://github.com/tushardashpute/opa_gatekeeper/assets/74225291/99c1ee4f-af5d-4f2e-be38-6a665d3bfcfb)
@@ -53,9 +56,12 @@ Following are the objects created as part of the gatekeeper installation:
 
 **CustomResourceDefinition**
 
-    The CustomResourceDefinition ( CRD ) API allows us to define custom resources. Defining a CRD object creates a new custom resource with a name and schema that we specify. The Kubernetes API serves and handles the storage of your custom resources.
+    The CustomResourceDefinition ( CRD ) API allows us to define custom resources. 
+    Defining a CRD object creates a new custom resource with a name and schema that we specify. 
+    The Kubernetes API serves and handles the storage of your custom resources.
     
-    Gatekeeper uses CustomResourceDefinitions internally and allows us to define ConstraintTemplates and Constraints to enforce policies on Kubernetes resources such as Pods, Deployments, and Jobs.
+    Gatekeeper uses CustomResourceDefinitions internally and allows us to define 
+    ConstraintTemplates and Constraints to enforce policies on Kubernetes resources such as Pods, Deployments, and Jobs.
     
 Gatekeeper creates several CRDs during the installation process :
 
